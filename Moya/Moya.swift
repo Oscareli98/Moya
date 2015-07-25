@@ -14,7 +14,7 @@ public class Moya {
 
     /// Network activity change notification closure typealias.
     public typealias NetworkActivityClosure = (change: NetworkActivityChangeType) -> ()
-    
+
     /// Represents an HTTP method.
     public enum Method {
         case GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH, TRACE, CONNECT
@@ -48,8 +48,8 @@ public class Moya {
         case URL
         case JSON
         case PropertyList(NSPropertyListFormat, NSPropertyListWriteOptions)
-        case Custom((URLRequestConvertible, [String: AnyObject]?) -> (NSURLRequest, NSError?))
-        
+        case Custom((URLRequestConvertible, [String: AnyObject]?) -> (NSMutableURLRequest, NSError?))
+
         func parameterEncoding() -> Alamofire.ParameterEncoding {
             switch self {
             case .URL:
@@ -88,7 +88,7 @@ public protocol Cancellable {
 /// Internal token that can be used to cancel requests
 struct CancellableToken: Cancellable {
     let cancelAction: () -> ()
-    
+
     func cancel() {
         cancelAction()
     }
@@ -101,12 +101,12 @@ public class MoyaProvider<T: MoyaTarget> {
     /// Closure that resolves an Endpoint into an NSURLRequest.
     public typealias MoyaEndpointResolution = (endpoint: Endpoint<T>) -> (NSURLRequest)
     public typealias MoyaStubbedBehavior = ((T) -> (Moya.StubbedBehavior))
-    
+
     public let endpointClosure: MoyaEndpointsClosure
     public let endpointResolver: MoyaEndpointResolution
     public let stubBehavior: MoyaStubbedBehavior
     public let networkActivityClosure: Moya.NetworkActivityClosure?
-    
+
     /// Initializes a provider.
     public init(endpointClosure: MoyaEndpointsClosure = MoyaProvider.DefaultEndpointMapping, endpointResolver: MoyaEndpointResolution = MoyaProvider.DefaultEnpointResolution, stubBehavior: MoyaStubbedBehavior = MoyaProvider.NoStubbingBehavior, networkActivityClosure: Moya.NetworkActivityClosure? = nil) {
         self.endpointClosure = endpointClosure
@@ -114,12 +114,12 @@ public class MoyaProvider<T: MoyaTarget> {
         self.stubBehavior = stubBehavior
         self.networkActivityClosure = networkActivityClosure
     }
-    
+
     /// Returns an Endpoint based on the token, method, and parameters by invoking the endpointsClosure.
     public func endpoint(token: T) -> Endpoint<T> {
         return endpointClosure(token)
     }
-    
+
     /// Designated request-making method.
     public func request(token: T, completion: MoyaCompletion) -> Cancellable {
         let endpoint = self.endpoint(token)
